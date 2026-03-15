@@ -10,6 +10,10 @@ import (
 	"os/signal"
 	"syscall"
 
+	customValidator "mx-shop-api/order-web/validator"
+
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	uuid "github.com/satori/go.uuid"
 	"go.uber.org/zap"
 )
@@ -33,6 +37,11 @@ func main() {
 		if err == nil {
 			global.ServerConfig.Port = port
 		}
+	}
+
+	// 注册自定义表单验证器
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		_ = v.RegisterValidation("mobile", customValidator.ValidateMobile)
 	}
 
 	// 注册至Consul注册中心
