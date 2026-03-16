@@ -2,7 +2,9 @@ package initialize
 
 import (
 	"encoding/json"
+	"fmt"
 	"mx-shop-api/order-web/global"
+	"mx-shop-api/order-web/models"
 	"os"
 	"path/filepath"
 
@@ -90,5 +92,6 @@ func InitConfig() {
 		s.Panicf("读取nacos配置中心异常", err.Error())
 	}
 
-	s.Infof("全局配置文件：%v", global.ServerConfig)
+	fmt.Println("全局配置文件信息：")
+	models.ToStringLog(global.ServerConfig)
 }

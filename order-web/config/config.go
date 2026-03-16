@@ -22,11 +22,19 @@ type ConsulConfig struct {
 }
 
 type NacosConfig struct {
-	Host      string `mapstructure:"host"`
-	Port      uint64 `mapstructure:"port"`
-	Namespace string `mapstructure:"namespace"`
-	Group     string `mapstructure:"group"`
-	Dataid    string `mapstructure:"dataid"`
+	Host      string `mapstructure:"host" json:"host"`
+	Port      uint64 `mapstructure:"port" json:"port"`
+	Namespace string `mapstructure:"namespace" json:"namespace"`
+	Group     string `mapstructure:"group" json:"group"`
+	Dataid    string `mapstructure:"dataid" json:"dataid"`
+}
+
+type AlipayConfig struct {
+	AppID        string `mapstructure:"appid" json:"appid"`
+	PrivateKey   string `mapstructure:"private_key" json:"private_key"`
+	AliPublicKey string `mapstructure:"ali_public_key" json:"ali_public_key"`
+	NotifyURL    string `mapstructure:"notify_url" json:"notify_url"`
+	ReturnURL    string `mapstructure:"return_url" json:"return_url"`
 }
 
 type ServerConfig struct {
@@ -39,4 +47,5 @@ type ServerConfig struct {
 	InventorySrvConf InventorySrvConfig `mapstructure:"inventory_srv" json:"inventory_srv"`
 	JWTInfo          JWTConfig          `mapstructure:"jwt" json:"jwt"`
 	ConsulInfo       ConsulConfig       `mapstructure:"consul" json:"consul"`
+	AlipayInfo       AlipayConfig       `mapstructure:"alipay" json:"alipay"`
 }

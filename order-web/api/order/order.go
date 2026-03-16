@@ -11,6 +11,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/smartwalle/alipay/v3"
 	"go.uber.org/zap"
 )
 
@@ -24,7 +25,7 @@ func Create(ctx *gin.Context) {
 		api.HandleGrpcErrorToHttp(err, ctx)
 		return
 	}
-	_, err = global.OrderSrvClient.CreateOrder(context.Background(), &proto.OrderRequest{
+	orderResp, err := global.OrderSrvClient.CreateOrder(context.Background(), &proto.OrderRequest{
 		UserId:  int32(uid.(uint)),
 		Address: form.Address,
 		Name:    form.Name,
@@ -37,9 +38,16 @@ func Create(ctx *gin.Context) {
 		return
 	}
 
-	// TODO：用户下单完成一般需要跳转到支付宝的支付页面，所以这里需要构造跳转到支付宝页面的link
+	url, err := GenAlipayURL(orderResp.OrderSn, float64(orderResp.Total))
+	if err != nil {
+		s.Errorln("【Create】生成支付宝link失败", err)
+		api.HandleGrpcErrorToHttp(err, ctx)
+		return
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{
-		"msg": "ok",
+		"msg":        "ok",
+		"alipay_url": url,
 	})
 }
 
@@ -64,6 +72,7 @@ func Detail(ctx *gin.Context) {
 	/*
 		{
 			msg:"ok",
+			"alipay_url":xx,
 			"order_info":{
 				"id":       order.Id,
 				"user_id":  order.UserId,
@@ -118,8 +127,16 @@ func Detail(ctx *gin.Context) {
 		})
 	}
 
+	url, err := GenAlipayURL(resp.OrderInfo.OrderSn, float64(resp.OrderInfo.Total))
+	if err != nil {
+		s.Errorln("【Detail】生成支付宝link失败", err)
+		api.HandleGrpcErrorToHttp(err, ctx)
+		return
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{
 		"msg":        "ok",
+		"alipay_url": url,
 		"order_info": orderInfo,
 		"good_list":  goodList,
 	})
@@ -186,4 +203,39 @@ func List(ctx *gin.Context) {
 		"total": resp.Total,
 		"data":  finalDataSlice,
 	})
+}
+
+// 生成跳转到支付宝的付款链接
+func GenAlipayURL(orderSn string, totalAmount float64) (string, error) {
+	s := zap.S()
+	appID := global.ServerConfig.AlipayInfo.AppID
+	privateKey := global.ServerConfig.AlipayInfo.PrivateKey
+	aliPublicKey := global.ServerConfig.AlipayInfo.AliPublicKey
+
+	client, err := alipay.New(appID, privateKey, false)
+	if err != nil {
+		s.Errorln("【Create】生成支付宝link失败", err)
+		return "", err
+	}
+
+	err = client.LoadAliPayPublicKey(aliPublicKey)
+	if err != nil {
+		s.Errorln("【Create】生成支付宝link失败", err)
+		return "", err
+	}
+
+	var p = alipay.TradePagePay{}
+	p.NotifyURL = global.ServerConfig.AlipayInfo.NotifyURL // 用户支付完成后支付宝回调这个API
+	p.ReturnURL = global.ServerConfig.AlipayInfo.ReturnURL // 用户支付完成后自动重定向跳转的页面
+	p.Subject = "mxshop订单-" + orderSn                      // 订单名称
+	p.OutTradeNo = orderSn                                 // 订单编号
+	p.TotalAmount = strconv.FormatFloat(totalAmount, 'f', 2, 32)
+	p.ProductCode = "FAST_INSTANT_TRADE_PAY"
+
+	url, err := client.TradePagePay(p)
+	if err != nil {
+		s.Errorln("【Create】生成支付宝link失败", err)
+		return "", err
+	}
+	return url.String(), nil
 }
