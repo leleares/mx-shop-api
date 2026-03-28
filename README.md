@@ -84,4 +84,64 @@ type Form struct {
 1. 对称加密：只有一个密钥，安全性相对较低。
 2. 非对称加密：有公钥和私钥之分，公钥可以交给别人，私钥需要自己保护好。私钥加密使用公钥才能解开。
 
+### elasticsearch
+mysql实现搜索的痛点：
+1. 性能低
+2. 没有相关度排名
+3. 无法全文搜索
+4. 没有分词
 
+什么是elasticsearch？
+Elasticsearch 是一个分布式可扩展的实时搜索和分析引擎，一个建立在全文搜索引擎 Apache Lucene（TM）基础上的搜索引擎：
+1. 分布式实时文件存储，并将每一个字段都编入索引，使其可以被搜索。
+2. 实时分析的分布式搜索引擎。
+3. 可以扩展到上百台服务器，处理PB级别的结构化或非结构化数据。I
+
+
+### 
+```bash
+# 使用docker启动es
+docker run -d \
+  --name es \
+  -p 9200:9200 \
+  -e "discovery.type=single-node" \
+  -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" \
+  -e "xpack.security.enabled=false" \
+  -v /Users/$(whoami)/es-data:/usr/share/elasticsearch/data \
+  -v /Users/$(whoami)/ik:/usr/share/elasticsearch/config/analysis-ik \
+  docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+
+# 启动kibana
+docker run -d \
+  --name kibana \
+  -p 5601:5601 \
+  --link es:elasticsearch \
+  docker.elastic.co/kibana/kibana:8.11.0  
+```
+
+### es容器相关操作
+进入es容器：`docker exec -it es /bin/bash`
+以root身份进入es容器`docker exec -it -u root es /bin/bash`
+
+
+
+### cat写入文件操作
+```bash
+# 覆盖写入
+cat > custom.dic <<EOF
+iphone15
+华为mate60
+小米14
+EOF
+
+# 追加写入
+cat >> custom.dic <<EOF
+特斯拉
+拼多多
+EOF
+
+# 单行追加
+echo "macbookpro" >> custom.dic
+
+echo "mate40" >> custom.dic
+```
