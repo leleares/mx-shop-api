@@ -95,7 +95,7 @@ func GoodsList(ctx *gin.Context) {
 		req.Brand = int32(brand)
 	}
 
-	resp, err := global.GoodSrvClient.GoodsList(context.Background(), &req)
+	resp, err := global.GoodSrvClient.GoodsList(context.WithValue(context.Background(), "ginContext", ctx), &req)
 	if err != nil {
 		s.Errorf("【GoodsList】Error", err.Error())
 		api.HandleGrpcErrorToHttp(err, ctx)

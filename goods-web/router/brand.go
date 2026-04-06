@@ -2,12 +2,13 @@ package router
 
 import (
 	"mx-shop-api/goods-web/api/brands"
+	"mx-shop-api/goods-web/middlewares"
 
 	"github.com/gin-gonic/gin"
 )
 
 func InitBrandRouter(router *gin.RouterGroup) {
-	BrandGroup := router.Group("brand")
+	BrandGroup := router.Group("brand").Use(middlewares.Trace())
 	{
 		BrandGroup.POST("/create", brands.CreateBrand)
 		BrandGroup.DELETE("/delete/:id", brands.DeleteBrand)

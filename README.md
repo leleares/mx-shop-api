@@ -124,6 +124,22 @@ docker run -d \
 以root身份进入es容器`docker exec -it -u root es /bin/bash`
 
 
+### 启动rocketmq
+根目录下有一个docker-compose文件，直接进入根目录执行命令即可
+> 启动rocketmq `docker-compose up -d`
+> 关闭rocketmq `docker-compose down`
+>rocketmq webUI：`http://localhost:8080/`
+
+### 启动jaeger
+```bash
+docker run --rm --name jaeger \
+  -p 16686:16686 \
+  -p 6831:6831/udp \
+  -p 14268:14268 \
+  jaegertracing/all-in-one:1.57
+```
+
+> jarger webUI：`http://localhost:16686/`
 
 ### cat写入文件操作
 ```bash
@@ -145,3 +161,5 @@ echo "macbookpro" >> custom.dic
 
 echo "mate40" >> custom.dic
 ```
+
+
