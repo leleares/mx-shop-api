@@ -25,7 +25,7 @@ func Create(ctx *gin.Context) {
 		api.HandleGrpcErrorToHttp(err, ctx)
 		return
 	}
-	orderResp, err := global.OrderSrvClient.CreateOrder(context.Background(), &proto.OrderRequest{
+	orderResp, err := global.OrderSrvClient.CreateOrder(context.WithValue(context.Background(), "ginContext", ctx), &proto.OrderRequest{
 		UserId:  int32(uid.(uint)),
 		Address: form.Address,
 		Name:    form.Name,

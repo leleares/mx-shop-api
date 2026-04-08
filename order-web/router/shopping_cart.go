@@ -8,7 +8,7 @@ import (
 )
 
 func InitShopingCartRouter(router *gin.RouterGroup) {
-	ShoppingCartGroup := router.Group("shopping_cart").Use(middlewares.JWTAuth())
+	ShoppingCartGroup := router.Group("shopping_cart").Use(middlewares.JWTAuth()).Use(middlewares.Trace())
 	{
 		ShoppingCartGroup.POST("/create", shoppingcart.Create)
 		ShoppingCartGroup.GET("/list", shoppingcart.List)
