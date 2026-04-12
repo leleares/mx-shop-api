@@ -23,6 +23,8 @@ func main() {
 	Router := initialize.Routers()
 	// 初始化srv的连接，生成全局client
 	initialize.InitSrvConn()
+	// 初始化sentinel (限流、熔断)
+	initialize.InitSentinel()
 
 	// 这里应该使用viper获取环境变量读取是否是线上环境，这里先写死
 	isDebug := true

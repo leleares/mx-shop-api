@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"strconv"
 
+	sentinel "github.com/alibaba/sentinel-golang/api"
+	"github.com/alibaba/sentinel-golang/core/base"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -94,6 +96,17 @@ func GoodsList(ctx *gin.Context) {
 		brand, _ := strconv.Atoi(brandIdStr)
 		req.Brand = int32(brand)
 	}
+
+	// 限流
+	e, b := sentinel.Entry("goods-web-goods-list", sentinel.WithTrafficType(base.Inbound))
+	if b != nil {
+		s.Errorf("【GoodsList】限流: %v", b.Error())
+		ctx.JSON(http.StatusTooManyRequests, gin.H{
+			"msg": "请求过于频繁，请稍后再试",
+		})
+		return
+	}
+	defer e.Exit()
 
 	resp, err := global.GoodSrvClient.GoodsList(context.WithValue(context.Background(), "ginContext", ctx), &req)
 	if err != nil {
