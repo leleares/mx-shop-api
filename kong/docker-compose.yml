@@ -40,7 +40,7 @@
           condition: service_completed_successfully   
       environment:
         KONG_DATABASE: postgres
-        KONG_PG_HOST: kong-database
+        KONG_PG_HOST: 192.168.1.106    # 用宿主机 IP 直连 DB(postgres 已映射 5432),避开被 Consul DNS 接管后解析不了容器名的问题
         KONG_PG_USER: kong
         KONG_PG_PASSWORD: kong
         KONG_PROXY_ACCESS_LOG: /dev/stdout
@@ -49,6 +49,7 @@
         KONG_ADMIN_ERROR_LOG: /dev/stderr
         KONG_ADMIN_LISTEN: 0.0.0.0:8001          # 开放 Admin API 给容器外
         KONG_ADMIN_GUI_URL: http://localhost:8002
+        KONG_DNS_RESOLVER: 192.168.1.106:8600 # 指向宿主机上的 Consul DNS(8600),IP 换网络会变,变了改这里
       ports:
         - "8000:8000"   # 代理入口,客户端真正访问业务走这里
         - "8443:8443"   # 代理 HTTPS
