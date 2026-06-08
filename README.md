@@ -140,6 +140,11 @@ docker run --rm --name jaeger \
 ```
 
 > jarger webUI：`http://localhost:16686/`
+>
+> ### 启动kong
+
+`cd kong`
+`docker compose up -d`
 
 ### cat写入文件操作
 ```bash
